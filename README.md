@@ -11,3 +11,7 @@ Experimental Rubiks cube program
     - automatic, ML?
 
 ## Coding principles
+
+[Python structure](https://docs.python-guide.org/writing/structure/)
+[Python structure dos and don'ts](https://stackoverflow.com/questions/193161/what-is-the-best-project-structure-for-a-python-application/3419951#3419951)
+[Python boilerplate template](https://pypi.org/project/python_boilerplate_template/)
