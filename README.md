@@ -1,7 +1,9 @@
 # RuPyks
+
 Experimental Rubiks cube program
 
 ## To do
+
 - Create structure to represent Rubics Cube [RC] state
 - Create function(s) to change RC state
 - Create visualization of RC state
@@ -9,6 +11,14 @@ Experimental Rubiks cube program
 - Create function(s)/method(s) to solve RC
     - stepwise (e. g. LBL)
     - automatic, ML?
+
+## RC Structure
+
+Based on folded cube:
+
+[![](https://ruwix.com/pics/western-color-scheme-rubiks-cube.jpg)](https://ruwix.com/the-rubiks-cube/japanese-western-color-schemes/)
+
+Each face is represented by a 3 by 3 numpy array. Furthermore, a numpy ndarry (3, 3, 3) represents the generel structure to track the position of each little cube, where structure[0] is the front face and everything if viewed from the front.
 
 ## Coding principles
 
