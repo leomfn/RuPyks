@@ -59,6 +59,16 @@ class Cube:
                 labelleft=False, labelbottom=False)
         plt.show()
 
+    def check(self):
+        sides = ['up', 'down', 'front', 'back', 'left', 'right']
+        i = 0
+        for side in sides:
+            i += len(np.unique(getattr(self, side)))
+        if i > 6:
+            print('not solved')
+        else:
+            print('solved')
+
 
 cube = Cube()
 
