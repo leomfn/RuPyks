@@ -15,11 +15,13 @@ Experimental Rubiks cube program
 
 ## RC Structure
 
+The Cube is represented by a 3 by 3 by 3 numpy ndarray in a 3D right hand cartesian coordinate system: X axis in the direction of array columns (second dimension, "left to right"), Y axis in the direction of the array's third dimension, "front to back"), Z axis in the reverse direction of array rows (first dimension, "bottom to top"). A 
+
 Based on folded cube:
 
 [![](https://ruwix.com/pics/western-color-scheme-rubiks-cube.jpg)](https://ruwix.com/the-rubiks-cube/japanese-western-color-schemes/)
 
-Each face is represented by a 3 by 3 numpy array. Furthermore, a numpy ndarry (3, 3, 3) represents the generel structure to track the position of each little cube, where structure[0] is the front face and everything if viewed from the front.
+Each face is represented by a 3 by 3 numpy array. Furthermore, a numpy ndarry (3, 3, 3) represents the general structure to track the position of each little cube, where structure[0] is the front face and everything if viewed from the front.
 
 ## Coding principles
 
