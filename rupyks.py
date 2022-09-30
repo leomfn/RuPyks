@@ -1,69 +1,120 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import random
 
 
 class Cube:
-    struc = np.arange(0, 27).reshape(3, 3, 3)
-    up = np.reshape(['w']*9, (3, 3))  # white
-    down = np.reshape(['y']*9, (3, 3))  # yellow
-    left = np.reshape(['o']*9, (3, 3))  # orange
-    right = np.reshape(['r']*9, (3, 3))  # red
-    front = np.reshape(['g']*9, (3, 3))  # green
-    back = np.reshape(['b']*9, (3, 3))  # blue
 
-    def turn_y_pos(self):
-        """Turn the cube's side facing the positive y direction ("Front")
-        clockwise"""
-        self.struc[0] = np.rot90(self.struc[0], k=-1)
-        self.front = np.rot90(self.front, k=-1)
-        temp = self.up[2, :].copy()
-        self.up[2, :] = self.left[:, 2][::-1]
-        self.left[:, 2] = self.down[0, :]
-        self.down[0, :] = self.right[:, 0][::-1]
-        self.right[:, 0] = temp
+    def __init__(self):
+        self.struc = self.reset()
 
-    def turn_y_pos_r(self):
-        """Turn the cube's side facing the positive y direction ("Front")
-        counter clockwise (reverse)"""
-        self.struc[0] = np.rot90(self.struc[0], k=1)
-        self.front = np.rot90(self.front, k=1)
-        temp = self.up[2, :].copy()
-        self.up[2, :] = self.right[:, 0]
-        self.right[:, 0] = self.down[0, :][::-1]
-        self.down[0, :] = self.left[:, 2]
-        self.left[:, 2] = temp[::-1]
+    def reset(self):
+
+        struc = np.zeros((5, 5, 5))
+
+        struc[0, 1:-1, 1:-1] = 1  # negative x-direction, left, 1 = orange
+        struc[-1, 1:-1, 1:-1] = 2  # positive x-direction, right, 2 = red
+        struc[1:-1, 0, 1:-1] = 3  # negative y-direction, front, 3 = green
+        struc[1:-1, -1, 1:-1] = 4  # positive y-direction, back, 4 = blue
+        struc[1:-1, 1:-1, 0] = 5  # negative z-direction, down, 5 = yellow
+        struc[1:-1, 1:-1, -1] = 6  # positive z-direction, up, 6 = white
+
+        struc[struc == 0] = np.nan
+
+        return struc
+
+    def rotate(self, axis, side, direction=1):
+        """Rotates one side of the cube.
+
+        Keyword arguments:
+        axis -- the axis as tuple with length 2
+        side -- the side to rotate, 0 = side at minimum of chosen axis, 1 = side at maximum of chosen axis
+        direction -- the direction around axis based on left hand rule, 1 = counter clockwise, -1 = clockwise (default 1)
+        """
+        struc = self.struc
+
+        if side == 0:
+            slice_index_start = 0
+            slice_index_end = 2
+        elif side == 1:
+            slice_index_start = -2
+            slice_index_end = 5
+
+        # How to unify the following into a single function?
+        if axis == 'x':
+            ax = (2, 1)
+            struc[slice_index_start:slice_index_end, :, :] = np.rot90(
+                struc[slice_index_start:slice_index_end, :, :], k=direction, axes=ax)
+        elif axis == 'y':
+            # face = struc[:, slice_index_start:slice_index_end, :]
+            ax = (0, 2)
+            struc[:, slice_index_start:slice_index_end, :] = np.rot90(
+                struc[:, slice_index_start:slice_index_end, :], k=direction, axes=ax)
+        elif axis == 'z':
+            ax = (1, 0)
+            struc[:, :, slice_index_start:slice_index_end] = np.rot90(
+                struc[:, :, slice_index_start:slice_index_end], k=direction, axes=ax)
+
+        # face = np.rot90(face, k = direction, axes = ax)
+
+    def shuffle(self):
+        """Shuffles the cube by rotating randomly 1000 times."""
+        struc = self.struc
+        axes = ['x', 'y', 'z']
+        for i in range(1000):
+            ax = random.choice(axes)
+            side = np.random.randint(2)
+            dir = random.choice([-1, 1])
+
+            self.rotate(axis=ax, side=side, direction=dir)
+
+
+    def check(self):
+        """Checks if cube is solved (True) or not (False)."""
+        struc = self.struc
+        i = 0
+        for dim in range(3):
+            for side in [0, -1]:
+                uniqueValues = np.unique(
+                    np.rollaxis(self.struc, dim)[side]
+                )
+                i += len(uniqueValues[~np.isnan(uniqueValues)])
+        if i == 6:
+            return True
+        else:
+            return False
+        # np.rollaxis(cube.struc, 0)[-1]
+        # np.unique(cube.struc[0,:,:])
 
     def plot(self):
-        """Display the current (folded) cube's status using matplotlib's imshow"""
-        colors = {'w': [i / 255 for i in [255, 255, 255]],
-                  'y': [i / 255 for i in [255, 255, 0]],
-                  'o': [i / 255 for i in [255, 128, 0]],
-                  'r': [i / 255 for i in [255, 0, 0]],
-                  'g': [i / 255 for i in [0, 128, 0]],
-                  'b': [i / 255 for i in [0, 0, 255]]}
-        sideaxes = {'up': (0, 1), 'down': (2, 1), 'left': (1, 0),
-                    'right': (1, 2), 'front': (1, 1), 'back': (1, 3)}
-        fig, ax = plt.subplots(3, 4)
-        for axis in ax.flatten():
-            axis.axis('off')
-        for i, side in enumerate(sideaxes.keys()):
-            Z = np.zeros((3, 3, 3))
-            for color in colors.keys():
-                Z[:, :, 0][getattr(self, side) == color] = colors[color][0]
-                Z[:, :, 1][getattr(self, side) == color] = colors[color][1]
-                Z[:, :, 2][getattr(self, side) == color] = colors[color][2]
-            print(Z)
-            ax[sideaxes[side]].imshow(Z)
-            ax[sideaxes[side]].axis('on')
-            ax[sideaxes[side]].tick_params(top=False, bottom=False, left=False, right=False,
-                labelleft=False, labelbottom=False)
+
+        colors = {1: 'orange', 2: 'red', 3: 'green',
+                  4: 'blue', 5: 'yellow', 6: 'white'}
+
+        x = [0, 0.5, 1.5, 2.5, 3]
+        y = [0, 0.5, 1.5, 2.5, 3]
+        z = [0, 0.5, 1.5, 2.5, 3]
+
+        X, Y, Z = np.meshgrid(x, y, z, indexing='ij')
+
+        fig = plt.figure()
+        ax = fig.add_subplot(projection='3d')
+        for x, y, z, s in zip(X.flatten(), Y.flatten(), Z.flatten(), self.struc.flatten()):
+            # print(x, y, z, s)
+            if not np.isnan(s):
+                # print(colors[s])
+                ax.scatter(x, y, z, s=50, c=colors[s])
+        # ax.scatter(X, Y, Z, struc)
+        ax.set_xlabel('X')
+        ax.set_ylabel('Y')
+        ax.set_zlabel('Z')
+        # ax.scatter(1, 1, 1, color = 1)
         plt.show()
 
 
 cube = Cube()
-
+cube.check()
 cube.plot()
-
-cube.turn_y_pos()
-cube.turn_y_pos_r()
+cube.shuffle()
+cube.check()
 cube.plot()
